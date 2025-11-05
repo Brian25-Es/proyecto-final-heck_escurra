@@ -4,7 +4,7 @@ require "configdatabase.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $usuario  = $_POST["user"];
+    $usuario  = $_POST["usuario"];
     $password = $_POST["password"];
 
     $sql = "SELECT * FROM usuario_sistema WHERE user = ?";
