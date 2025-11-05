@@ -4,10 +4,10 @@ require "configdatabase.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $usuario  = $_POST["usuario"];
+    $usuario  = $_POST["user"];
     $password = $_POST["password"];
 
-    $sql = "SELECT * FROM usuarios_sistema WHERE usuario = ?";
+    $sql = "SELECT * FROM usuario_sistema WHERE user = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $usuario);
     $stmt->execute();
@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($user && password_verify($password, $user["password"])) {
 
         $_SESSION["usuario_id"]     = $user["id"];
-        $_SESSION["usuario_nombre"] = $user["usuario"];
+        $_SESSION["usuario_nombre"] = $user["user"];
         $_SESSION["usuario_rol"]    = $user["rol"];
 
         header("Location: dashboard.php");
