@@ -7,17 +7,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $usuario  = $_POST["usuario"];
     $password = $_POST["password"];
 
-    $sql = "SELECT * FROM usuarios_sistema WHERE usuario = ?";
+    $sql = "SELECT * FROM usuario_sistema WHERE user = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $usuario);
     $stmt->execute();
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
 
-    if ($user && password_verify($password, $user["password"])) {
+    // CONTRASEÑA EN TEXTO PLANO
+    if ($user && $password === $user["password"]) {
 
         $_SESSION["usuario_id"]     = $user["id"];
-        $_SESSION["usuario_nombre"] = $user["usuario"];
+        $_SESSION["usuario_nombre"] = $user["user"];  // corregido
         $_SESSION["usuario_rol"]    = $user["rol"];
 
         header("Location: dashboard.php");
