@@ -1,6 +1,6 @@
 <?php
-require "../includes/auth.php";
-require "../config/database.php";
+require "../includesauth.php";
+require "../configdatabase.php";
 
 $sql = "SELECT * FROM usuarios ORDER BY id DESC";
 $result = $conn->query($sql);
