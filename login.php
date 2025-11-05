@@ -1,23 +1,24 @@
 <?php
 session_start();
-require "configdatabase.php";
+require "config/database.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $db = new Database();
-    $conn = $db->getConnection();
-
-    $usuario = $_POST["usuario"];
+    $usuario  = $_POST["usuario"];
     $password = $_POST["password"];
 
-    $query = $conn->prepare("SELECT * FROM usuarios_sistema WHERE usuario = :usuario");
-    $query->execute([":usuario" => $usuario]);
-    $user = $query->fetch(PDO::FETCH_ASSOC);
+    $sql = "SELECT * FROM usuarios_sistema WHERE usuario = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $usuario);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
 
     if ($user && password_verify($password, $user["password"])) {
-        $_SESSION["usuario_id"] = $user["id"];
-        $_SESSION["usuario_nombre"] = $user["nombre"];
-        $_SESSION["usuario_rol"] = $user["rol"];
+
+        $_SESSION["usuario_id"]     = $user["id"];
+        $_SESSION["usuario_nombre"] = $user["usuario"];
+        $_SESSION["usuario_rol"]    = $user["rol"];
 
         header("Location: dashboard.php");
         exit();
@@ -26,13 +27,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html>
-<head>
-<title>Login</title>
-</head>
+<head><title>Login</title></head>
 <body>
+
 <h2>Iniciar sesión</h2>
 
 <form action="" method="POST">
