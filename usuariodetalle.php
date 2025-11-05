@@ -1,6 +1,6 @@
 <?php
-require "../includes/auth.php";
-require "../config/database.php";
+require "../includesauth.php";
+require "../configdatabase.php";
 
 $id = $_GET["id"];
 
