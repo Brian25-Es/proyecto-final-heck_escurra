@@ -33,5 +33,4 @@ $result = $conn->query($sql);
 </tr>
 <?php endwhile; ?>
 
-
 </table>
