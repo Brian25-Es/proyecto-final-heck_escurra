@@ -1,9 +1,9 @@
 <?php
 class Database {
     private $host = "localhost";
-    private $db_name = "biblioteca";  // debe coincidir con tu BD
-    private $username = "root";
-    private $password = "";
+    private $db_name = "proyecto_biblioteca";  // debe coincidir con tu BD
+    private $username = "adminphp";
+    private $password = "TuContraseñaSegura";
     public $conn;
 
     public function getConnection() {
