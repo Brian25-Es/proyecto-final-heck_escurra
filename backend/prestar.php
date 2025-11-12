@@ -20,6 +20,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Cambiar estado del libro a "Prestado"
     $conn->query("UPDATE libros SET estado='Prestado' WHERE ID=$libro_id");
 
-    header("Location: index.php");
+    header("Location: dashboard.php");
 }
 ?>

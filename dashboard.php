@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 require "backend/configdatabase.php";
 
@@ -65,7 +68,7 @@ $prestamos = $conn->query("
                     <td><?= htmlspecialchars($l["editorial"]) ?></td>
                     <td><?= htmlspecialchars($l["año"]) ?></td>
                     <td>
-                        <form method="POST" action="prestar.php">
+                        <form method="POST" action="backend/prestar.php">
                             <input type="hidden" name="libro_id" value="<?= $l["ID"] ?>">
                             <button class="btn">Alquilar</button>
                         </form>
