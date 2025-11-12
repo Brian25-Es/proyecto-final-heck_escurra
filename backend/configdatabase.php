@@ -1,7 +1,7 @@
 <?php
 $host = "localhost";
-$user = "adminphp";
-$pass = "TuContraseñaSegura";
+$user = "root";     // o el usuario que uses
+$pass = "";         // tu contraseña si tenés una
 $db   = "proyecto_biblioteca";
 
 $conn = new mysqli($host, $user, $pass, $db);
