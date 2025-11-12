@@ -2,9 +2,11 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
-require "config/database.php";
+require "configdatabase.php";
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require "configdatabase.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -19,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
 
-    if ($user && $password($password, $user["password"])) {
+if ($user && password_verify($password, $user["password"])) {
 
         $_SESSION["usuario_id"]     = $user["id"];
         $_SESSION["usuario_nombre"] = $user["user"];
