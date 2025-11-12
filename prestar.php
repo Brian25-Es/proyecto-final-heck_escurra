@@ -1,6 +1,9 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
-require "configdatabase.php";
+require "backend/configdatabase.php";
 
 if (!isset($_SESSION["usuario_id"])) {
     header("Location: login.php");

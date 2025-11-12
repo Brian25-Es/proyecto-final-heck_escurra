@@ -68,7 +68,7 @@ $prestamos = $conn->query("
                     <td><?= htmlspecialchars($l["editorial"]) ?></td>
                     <td><?= htmlspecialchars($l["año"]) ?></td>
                     <td>
-                        <form method="POST" action="backend/prestar.php">
+                        <form method="POST" action="prestar.php">
                             <input type="hidden" name="libro_id" value="<?= $l["ID"] ?>">
                             <button class="btn">Alquilar</button>
                         </form>
