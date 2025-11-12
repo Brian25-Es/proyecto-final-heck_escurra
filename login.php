@@ -1,13 +1,6 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 session_start();
-require "configdatabase.php";
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-require "configdatabase.php";
+require "backend/configdatabase.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
@@ -22,9 +15,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user = $result->fetch_assoc();
 
     if ($user && password_verify($password, $user["password"])) {
-
-        $_SESSION["usuario_id"]     = $user["id"];
-        $_SESSION["usuario_nombre"] = $user["usuario"];
+        // Inicio de sesión correcto
+        $_SESSION["usuario_id"]     = $user["ID_User"];
+        $_SESSION["usuario_nombre"] = $user["nombre"];
         $_SESSION["usuario_rol"]    = $user["rol"];
 
         header("Location: dashboard.php");
@@ -35,19 +28,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 <!DOCTYPE html>
-<html>
-<head><title>Login</title></head>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <style>
+        body { font-family: Arial; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        form { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
+        input { display: block; margin-bottom: 10px; width: 200px; padding: 8px; }
+        button { padding: 8px 12px; }
+    </style>
+</head>
 <body>
-
-<h2>Iniciar sesión</h2>
-
-<form action="" method="POST">
-    <input type="text" name="usuario" placeholder="Usuario" required>
-    <input type="password" name="password" placeholder="Contraseña" required>
-    <button type="submit">Ingresar</button>
-</form>
-
-<?php if(isset($error)) echo "<p style='color:red'>$error</p>"; ?>
-
+    <form action="" method="POST">
+        <h2>Iniciar sesión</h2>
+        <input type="text" name="usuario" placeholder="Usuario" required>
+        <input type="password" name="password" placeholder="Contraseña" required>
+        <button type="submit">Ingresar</button>
+        <?php if(isset($error)) echo "<p style='color:red'>$error</p>"; ?>
+    </form>
 </body>
 </html>
