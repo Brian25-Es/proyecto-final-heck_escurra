@@ -1,6 +1,6 @@
 <?php
 session_start();
-require "configdatabase.php";
+require "backend/configdatabase.php";
 
 if (!isset($_SESSION["usuario_id"])) {
     header("Location: login.php");
@@ -20,6 +20,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Cambiar estado del libro a "Prestado"
     $conn->query("UPDATE libros SET estado='Prestado' WHERE ID=$libro_id");
 
-    header("Location: index.php");
+    header("Location: dashboard.php");
 }
 ?>
