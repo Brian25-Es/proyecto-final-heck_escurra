@@ -1,5 +1,12 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 session_start();
+require "configdatabase.php";
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require "configdatabase.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -14,11 +21,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
 
-    // CONTRASEÑA EN TEXTO PLANO
-    if ($user && $password === $user["password"]) {
+    if ($user && password_verify($password, $user["password"])) {
 
         $_SESSION["usuario_id"]     = $user["id"];
-        $_SESSION["usuario_nombre"] = $user["user"];  // corregido
+        $_SESSION["usuario_nombre"] = $user["usuario"];
         $_SESSION["usuario_rol"]    = $user["rol"];
 
         header("Location: dashboard.php");
