@@ -1,13 +1,13 @@
 <?php
-require "../includesauth.php";
-require "../configdatabase.php";
+require "includesauth.php";
+require "configdatabase.php";
 
 $sql = "SELECT * FROM usuarios ORDER BY id DESC";
 $result = $conn->query($sql);
 ?>
 
 <h2>Usuarios</h2>
-<a href="crear.php">➕ Nuevo usuario</a>
+<a href="usuariocrear.php">➕ Nuevo usuario</a>
 
 <table border="1">
 <tr>
@@ -27,8 +27,8 @@ $result = $conn->query($sql);
     <td><?= $u["dni"] ?></td>
     <td><?= $u["estado"] ?></td>
     <td>
-        <a href="detalle.php?id=<?= $u["id"] ?>">Ver</a> |
-        <a href="editar.php?id=<?= $u["id"] ?>">Editar</a>
+        <a href="usuariodetalle.php?id=<?= $u["id"] ?>">Ver</a> |
+        <a href="usuarioeditar.php?id=<?= $u["id"] ?>">Editar</a>
     </td>
 </tr>
 <?php endwhile; ?>

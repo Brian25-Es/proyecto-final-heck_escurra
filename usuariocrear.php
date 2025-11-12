@@ -1,6 +1,6 @@
 <?php
-require "../includesauth.php";
-require "../configdatabase.php";
+require "includesauth.php";
+require "configdatabase.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
@@ -11,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("sssss", $_POST["nombre"], $_POST["email"], $_POST["telefono"], $_POST["direccion"], $_POST["dni"]);
     $stmt->execute();
 
-    header("Location: index.php");
+    header("Location: usuarios.php");
     exit();
 }
 ?>

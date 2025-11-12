@@ -1,6 +1,6 @@
 <?php
-require "../includesauth.php";
-require "../configdatabase.php";
+require "includesauth.php";
+require "configdatabase.php";
 
 $id = $_GET["id"];
 
@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("ssssssi", $_POST["nombre"], $_POST["email"], $_POST["telefono"], $_POST["direccion"], $_POST["dni"], $_POST["estado"], $id);
     $stmt->execute();
 
-    header("Location: index.php");
+    header("Location: usuarios.php");
     exit();
 }
 ?>
