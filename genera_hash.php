@@ -1,7 +1,7 @@
 <?php
 // genera_hash.php
 // Cambiá la contraseña en $plaintext si querés otra
-$plaintext = 'G7#k9vLq2!Rd4sWz';
+$plaintext = '123456';
 
 // Genera el hash con el algoritmo por defecto de PHP (bcrypt/argon2 según versión)
 $hash = password_hash($plaintext, PASSWORD_DEFAULT);
