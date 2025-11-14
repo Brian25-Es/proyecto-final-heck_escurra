@@ -2,24 +2,27 @@
 session_start();
 require "backend/configdatabase.php";
 
-if (!isset($_SESSION["usuario_id"])) {
-    header("Location: login.php");
-    exit();
-}
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $usuario_id = $_SESSION["usuario_id"];
-    $libro_id   = $_POST["libro_id"];
+    $libro_id  = intval($_POST["libro_id"]);
+    $usuario_id = intval($_POST["usuario_id"]);
 
-    // Insertar préstamo
-    $stmt = $conn->prepare("INSERT INTO prestamos (ID_Libro, ID_Usuario, fecha_devolucion, estado_prestamo)
-                            VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY), 'Activo')");
+    if ($libro_id <= 0 || $usuario_id <= 0) {
+        echo "error";
+        exit();
+    }
+
+    // Registrar préstamo (+14 días)
+    $stmt = $conn->prepare("
+        INSERT INTO prestamos (ID_Libro, ID_Usuario, fecha_devolucion, estado_prestamo)
+        VALUES (?, ?, DATE_ADD(CURDATE(), INTERVAL 14 DAY), 'Activo')
+    ");
     $stmt->bind_param("ii", $libro_id, $usuario_id);
     $stmt->execute();
 
-    // Cambiar estado del libro a "Prestado"
+    // Cambiar estado del libro
     $conn->query("UPDATE libros SET estado='Prestado' WHERE ID=$libro_id");
 
-    header("Location: dashboard.php");
+    echo "ok";
 }
 ?>

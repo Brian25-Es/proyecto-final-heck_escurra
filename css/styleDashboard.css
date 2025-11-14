@@ -1,0 +1,89 @@
+body { font-family: Arial; margin: 0; background: #f5f5f5; }
+
+/* Encabezado */
+header {
+    background: #007bff;
+    padding: 10px;
+    color: white;
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* Menú de tabs */
+.tab-menu {
+    display: flex;
+    overflow-x: auto;
+    background: #ffffff;
+    border-bottom: 2px solid #ddd;
+}
+
+.tab-menu button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: white;
+    cursor: pointer;
+    font-size: 16px;
+    border-right: 1px solid #ddd;
+}
+
+.tab-menu button:hover {
+    background: #f1f1f1;
+}
+
+.tab-menu button.active {
+    background: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+/* Contenido */
+.tab-content {
+    display: none;
+    padding: 20px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Tablas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+}
+
+th {
+    background: #007bff;
+    color: white;
+}
+
+.btn {
+    padding: 6px 10px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.btn:hover { background: #218838; }
+.btn-warning { background: #ff9800; }
+.btn-danger { background: #dc3545; }
+.btn-danger:hover { background: #c82333; }
+
+/* Modal */
+#modalUsuarios {
+    display:none;
+    position:fixed; 
+    top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.6);
+    justify-content:center; 
+    align-items:center;
+}
