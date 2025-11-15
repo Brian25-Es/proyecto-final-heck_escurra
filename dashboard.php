@@ -18,13 +18,13 @@ $rol        = $_SESSION["usuario_rol"];
 // Libros disponibles
 $libros = $conn->query("SELECT * FROM libros WHERE estado = 'Disponible'");
 
-// TODOS los préstamos activos (Opción A)
+// TODOS los préstamos activos (columna correcta: estado_prestamo)
 $prestamos = $conn->query("
     SELECT p.*, l.titulo, u.nombre_completo
     FROM prestamos p
     INNER JOIN libros l ON p.ID_Libro = l.ID
     INNER JOIN usuarios u ON p.ID_Usuario = u.ID_Usuario
-    WHERE p.estado = 'Activo'
+    WHERE p.estado_prestamo = 'Activo'
 ");
 
 ?>
@@ -124,7 +124,7 @@ $prestamos = $conn->query("
                     <td><?= htmlspecialchars($p["nombre_completo"]) ?></td>
                     <td><?= htmlspecialchars($p["fecha_prestamo"]) ?></td>
                     <td><?= htmlspecialchars($p["fecha_devolucion"]) ?></td>
-                    <td><?= htmlspecialchars($p["estado"]) ?></td>
+                    <td><?= htmlspecialchars($p["estado_prestamo"]) ?></td>
                 </tr>
                 <?php endwhile; ?>
             </tbody>
