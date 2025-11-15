@@ -69,7 +69,7 @@ $libros = $conn->query("SELECT * FROM libros WHERE estado = 'Disponible'");
                     <td>
 
                         <!-- FORMULARIO CORRECTO PARA ASIGNAR PRÉSTAMO -->
-                        <form method="POST" action="backend/prestar.php">
+                        <form method="POST" action="prestar.php">
                             <input type="hidden" name="libro_id" value="<?= $l["ID"] ?>">
 
                             <!-- SELECT CORREGIDO -->
