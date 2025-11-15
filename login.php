@@ -10,18 +10,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $usuario  = $_POST["usuario"];
     $password = $_POST["password"];
 
-    // Consulta a usuario_sistema
-    $sql = "SELECT * FROM usuario_sistema WHERE usuario = ?";
+    // Consulta correcta según tu tabla
+    $sql = "SELECT * FROM usuario_sistema WHERE user = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $usuario);
     $stmt->execute();
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
 
+    // Verificación de usuario + contraseña
     if ($user && password_verify($password, $user["password"])) {
 
-        // Guardar datos en sesión
-        $_SESSION["usuario_id"]     = $user["id"];
+        // Guardar datos en sesión correctamente
+        $_SESSION["usuario_id"]     = $user["ID_User"];
         $_SESSION["usuario_nombre"] = $user["nombre"];
         $_SESSION["usuario_rol"]    = $user["rol"];
 
