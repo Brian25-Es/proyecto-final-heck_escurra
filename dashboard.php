@@ -10,7 +10,7 @@ if (!isset($_SESSION["usuario_id"])) {
     exit();
 }
 
-// Obtener datos del usuario actual
+// Obtener datos del usuario actual (bibliotecario)
 $usuario_id = $_SESSION["usuario_id"];
 $nombre     = $_SESSION["usuario_nombre"];
 $rol        = $_SESSION["usuario_rol"];
@@ -18,13 +18,6 @@ $rol        = $_SESSION["usuario_rol"];
 // Listar libros disponibles
 $libros = $conn->query("SELECT * FROM libros WHERE estado = 'Disponible'");
 
-// Listar préstamos del usuario actual
-$prestamos = $conn->query("
-    SELECT p.*, l.titulo 
-    FROM prestamos p 
-    INNER JOIN libros l ON p.ID_Libro = l.ID
-    WHERE p.ID_Usuario = $usuario_id AND p.estado_prestamo = 'Activo'
-");
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -58,7 +51,13 @@ $prestamos = $conn->query("
         <h3>📚 Libros disponibles</h3>
         <table>
             <thead>
-                <tr><th>Título</th><th>Autor</th><th>Editorial</th><th>Año</th><th>Acción</th></tr>
+                <tr>
+                    <th>Título</th>
+                    <th>Autor</th>
+                    <th>Editorial</th>
+                    <th>Año</th>
+                    <th>Asignar préstamo</th>
+                </tr>
             </thead>
             <tbody>
                 <?php while ($l = $libros->fetch_assoc()): ?>
@@ -68,10 +67,27 @@ $prestamos = $conn->query("
                     <td><?= htmlspecialchars($l["editorial"]) ?></td>
                     <td><?= htmlspecialchars($l["año"]) ?></td>
                     <td>
-                        <form method="POST" action="prestar.php">
+
+                        <!-- FORMULARIO CORRECTO PARA ASIGNAR PRÉSTAMO -->
+                        <form method="POST" action="backend/prestar.php">
                             <input type="hidden" name="libro_id" value="<?= $l["ID"] ?>">
-                            <button class="btn">Alquilar</button>
+
+                            <!-- SELECT CORREGIDO -->
+                            <select name="usuario_id" required>
+                                <option value="">-- Seleccionar usuario --</option>
+                                <?php
+                                $usuarios = $conn->query("SELECT ID_Usuario, nombre_completo FROM usuarios");
+                                while ($u = $usuarios->fetch_assoc()):
+                                ?>
+                                    <option value="<?= $u['ID_Usuario'] ?>">
+                                        <?= $u['nombre_completo'] ?>
+                                    </option>
+                                <?php endwhile; ?>
+                            </select>
+
+                            <button class="btn">Asignar préstamo</button>
                         </form>
+
                     </td>
                 </tr>
                 <?php endwhile; ?>
@@ -79,24 +95,6 @@ $prestamos = $conn->query("
         </table>
     </section>
 
-    <section>
-        <h3>📖 Mis préstamos activos</h3>
-        <table>
-            <thead>
-                <tr><th>Libro</th><th>Fecha préstamo</th><th>Fecha devolución</th><th>Estado</th></tr>
-            </thead>
-            <tbody>
-                <?php while ($p = $prestamos->fetch_assoc()): ?>
-                <tr>
-                    <td><?= htmlspecialchars($p["titulo"]) ?></td>
-                    <td><?= htmlspecialchars($p["fecha_prestamo"]) ?></td>
-                    <td><?= htmlspecialchars($p["fecha_devolucion"]) ?></td>
-                    <td><?= htmlspecialchars($p["estado_prestamo"]) ?></td>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
-    </section>
 </main>
 </body>
 </html>

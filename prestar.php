@@ -11,7 +11,7 @@ if (!isset($_SESSION["usuario_id"])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $usuario_id = $_SESSION["usuario_id"];
+    $usuario_id = $_POST["usuario_id"];
     $libro_id   = $_POST["libro_id"];
 
     // Insertar préstamo
