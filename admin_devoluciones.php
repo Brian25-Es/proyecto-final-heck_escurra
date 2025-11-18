@@ -1,6 +1,6 @@
 <?php
 session_start();
-require "configdatabase.php";
+require "backend/configdatabase.php";
 
 $prestamo_id = intval($_GET["prestamo_id"] ?? 0);
 $libro_id    = intval($_GET["libro_id"] ?? 0);
