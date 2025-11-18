@@ -10,7 +10,7 @@ if (!isset($_SESSION["usuario_id"])) {
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     http_response_code(403);
-    exit("Acceso directo no permitido.");
+    exit("Método inválido. Esta página solo acepta POST.");
 }
 
 $prestamo_id = intval($_POST["prestamo_id"]);
