@@ -66,6 +66,13 @@ th { background: #007bff; color: white; }
 
 <a href="dashboard_admin.php"><button class="btn btn-back">Volver al panel admin</button></a>
 
+<?php if (isset($_GET["msg"]) && $_GET["msg"] === "devuelto_ok"): ?>
+    <div style="padding:10px;background:#d4edda;color:#155724;border:1px solid #c3e6cb;margin-bottom:10px;">
+        ✔ Devolución registrada correctamente.
+    </div>
+<?php endif; ?>
+
+
 <h1>Control de Préstamos</h1>
 
 <!-- ===========================
