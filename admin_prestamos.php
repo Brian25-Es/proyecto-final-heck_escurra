@@ -1,54 +1,170 @@
 <?php
-// admin_prestamos.php
-error_reporting(E_ALL); ini_set('display_errors',1); header("Cache-Control:no-store");
-session_start(); require "backend/configdatabase.php";
-if (!isset($_SESSION["usuario_id"]) || $_SESSION["usuario_rol"]!=='admin') { header("Location: login.php"); exit(); }
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-$filter = $_GET['filter'] ?? 'activo';
-$where = "p.estado_prestamo = 'Activo'";
-if ($filter==='vencido') $where="p.estado_prestamo = 'Vencido'";
-if ($filter==='devuelto') $where="p.estado_prestamo = 'Devuelto'";
-if ($filter==='todos') $where="1=1";
+session_start();
+require "backend/configdatabase.php";
 
-$res = $conn->query("
-  SELECT p.*, l.titulo, u.nombre_completo
-  FROM prestamos p
-  LEFT JOIN libros l ON p.ID_Libro = l.ID
-  LEFT JOIN usuarios u ON p.ID_Usuario = u.ID_Usuario
-  WHERE $where
-  ORDER BY p.created_at DESC
+// Solo admin puede entrar
+if (!isset($_SESSION["usuario_id"]) || $_SESSION["usuario_rol"] !== 'admin') {
+    header("Location: login.php");
+    exit();
+}
+
+// Función para evitar deprecated de PHP8 al pasar NULL
+function h($v) {
+    return htmlspecialchars($v ?? '', ENT_QUOTES, 'UTF-8');
+}
+
+// Obtener préstamos activos
+$activos = $conn->query("
+    SELECT p.*, l.titulo, u.nombre_completo
+    FROM prestamos p
+    INNER JOIN libros l ON p.ID_Libro = l.ID
+    INNER JOIN usuarios u ON p.ID_Usuario = u.ID_Usuario
+    WHERE p.estado_prestamo = 'Activo'
+    ORDER BY p.fecha_prestamo DESC
+");
+
+// Obtener préstamos vencidos
+$vencidos = $conn->query("
+    SELECT p.*, l.titulo, u.nombre_completo
+    FROM prestamos p
+    INNER JOIN libros l ON p.ID_Libro = l.ID
+    INNER JOIN usuarios u ON p.ID_Usuario = u.ID_Usuario
+    WHERE p.estado_prestamo = 'Vencido'
+    ORDER BY p.fecha_devolucion ASC
+");
+
+// Obtener préstamos devueltos
+$devueltos = $conn->query("
+    SELECT p.*, l.titulo, u.nombre_completo
+    FROM prestamos p
+    INNER JOIN libros l ON p.ID_Libro = l.ID
+    INNER JOIN usuarios u ON p.ID_Usuario = u.ID_Usuario
+    WHERE p.estado_prestamo = 'Devuelto'
+    ORDER BY p.fecha_dev_real DESC
 ");
 ?>
-<!doctype html>
-<html lang="es"><head><meta charset="utf-8"><title>Admin - Préstamos</title>
-<style>body{font-family:Arial;margin:20px;background:#f5f5f5}.card{background:#fff;padding:12px} table{width:100%;border-collapse:collapse}th,td{border:1px solid #eee;padding:6px}</style>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Administración de Préstamos</title>
+<style>
+body { font-family: Arial; background: #f4f4f4; margin: 0; padding: 20px; }
+h2 { margin-bottom: 5px; }
+.section { background: white; padding: 15px; margin-bottom: 25px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th, td { padding: 8px; border: 1px solid #ccc; }
+th { background: #007bff; color: white; }
+.btn { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; color: white; }
+.btn-back { background: #6c757d; }
+</style>
 </head>
 <body>
-<div class="card">
-  <h2>Préstamos - filtro: <?=htmlspecialchars($filter)?></h2>
-  <div class="small"><a href="admin_prestamos.php?filter=activo">Activos</a> | <a href="admin_prestamos.php?filter=vencido">Vencidos</a> | <a href="admin_prestamos.php?filter=devuelto">Devueltos</a> | <a href="admin_prestamos.php?filter=todos">Todos</a> | <a href="dashboard_admin.php">Volver admin</a></div>
-  <table style="margin-top:10px"><thead><tr><th>ID</th><th>Libro</th><th>Usuario</th><th>Fecha préstamo</th><th>Fecha devolución</th><th>Fecha real</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
-<?php while($r=$res->fetch_assoc()): ?>
-  <tr>
-    <td><?=htmlspecialchars($r['ID_Prestamo'])?></td>
-    <td><?=htmlspecialchars($r['titulo'])?></td>
-    <td><?=htmlspecialchars($r['nombre_completo'])?></td>
-    <td><?=htmlspecialchars($r['fecha_prestamo'])?></td>
-    <td><?=htmlspecialchars($r['fecha_devolucion'])?></td>
-    <td><?=htmlspecialchars($r['fecha_dev_real'])?></td>
-    <td><?=htmlspecialchars($r['estado_prestamo'])?></td>
-    <td>
-      <?php if($r['estado_prestamo'] !== 'Devuelto'): ?>
-        <form method="POST" action="admin_devoluciones.php" style="display:inline">
-            <input type="hidden" name="ID_Prestamo" value="<?=htmlspecialchars($r['ID_Prestamo'])?>">
-            <button type="submit">Marcar devuelto</button>
-        </form>
-      <?php else: ?>
-        Devuelto
-      <?php endif; ?>
-    </td>
-  </tr>
-<?php endwhile; ?>
-  </tbody></table>
+
+<a href="dashboard_admin.php"><button class="btn btn-back">Volver al panel admin</button></a>
+
+<h1>Control de Préstamos</h1>
+
+<!-- ===========================
+     PRÉSTAMOS ACTIVOS
+     =========================== -->
+<div class="section">
+    <h2>📘 Préstamos Activos</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Libro</th>
+                <th>Usuario</th>
+                <th>Fecha Préstamo</th>
+                <th>Fecha Devolución</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php while ($p = $activos->fetch_assoc()): ?>
+            <tr>
+                <td><?= h($p["titulo"]) ?></td>
+                <td><?= h($p["nombre_completo"]) ?></td>
+                <td><?= h($p["fecha_prestamo"]) ?></td>
+                <td><?= h($p["fecha_devolucion"]) ?></td>
+                <td><?= h($p["estado_prestamo"]) ?></td>
+            </tr>
+        <?php endwhile; ?>
+        </tbody>
+    </table>
 </div>
-</body></html>
+
+<!-- ===========================
+     PRÉSTAMOS VENCIDOS
+     =========================== -->
+<div class="section">
+    <h2>⏰ Préstamos Vencidos</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Libro</th>
+                <th>Usuario</th>
+                <th>Fecha Préstamo</th>
+                <th>Fecha Devolución</th>
+                <th>Días atraso</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php while ($p = $vencidos->fetch_assoc()): ?>
+            <tr>
+                <td><?= h($p["titulo"]) ?></td>
+                <td><?= h($p["nombre_completo"]) ?></td>
+                <td><?= h($p["fecha_prestamo"]) ?></td>
+                <td><?= h($p["fecha_devolucion"]) ?></td>
+                <td>
+                    <?php
+                        $hoy = new DateTime();
+                        $fecha_dev = new DateTime($p["fecha_devolucion"]);
+                        $dias = $fecha_dev->diff($hoy)->days;
+                        echo $dias;
+                    ?>
+                </td>
+                <td><?= h($p["estado_prestamo"]) ?></td>
+            </tr>
+        <?php endwhile; ?>
+        </tbody>
+    </table>
+</div>
+
+<!-- ===========================
+     PRÉSTAMOS DEVUELTOS
+     =========================== -->
+<div class="section">
+    <h2>📗 Préstamos Devueltos</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Libro</th>
+                <th>Usuario</th>
+                <th>Fecha Préstamo</th>
+                <th>Fecha Devolución</th>
+                <th>Fecha Devuelta</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php while ($p = $devueltos->fetch_assoc()): ?>
+            <tr>
+                <td><?= h($p["titulo"]) ?></td>
+                <td><?= h($p["nombre_completo"]) ?></td>
+                <td><?= h($p["fecha_prestamo"]) ?></td>
+                <td><?= h($p["fecha_devolucion"]) ?></td>
+                <td><?= h($p["fecha_dev_real"]) ?></td>
+                <td><?= h($p["estado_prestamo"]) ?></td>
+            </tr>
+        <?php endwhile; ?>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
