@@ -81,6 +81,7 @@ th { background: #007bff; color: white; }
                 <th>Fecha Préstamo</th>
                 <th>Fecha Devolución</th>
                 <th>Estado</th>
+                <th>Acción</th>
             </tr>
         </thead>
         <tbody>
@@ -91,12 +92,18 @@ th { background: #007bff; color: white; }
                 <td><?= h($p["fecha_prestamo"]) ?></td>
                 <td><?= h($p["fecha_devolucion"]) ?></td>
                 <td><?= h($p["estado_prestamo"]) ?></td>
+                <td>
+                    <form method="POST" action="backend/devolver.php" onsubmit="return confirm('¿Registrar devolución?');">
+                        <input type="hidden" name="prestamo_id" value="<?= $p['ID_Prestamo'] ?>">
+                        <input type="hidden" name="libro_id" value="<?= $p['ID_Libro'] ?>">
+                        <button class="btn" style="background:#28a745">Devolver</button>
+                    </form>
+                </td>
             </tr>
         <?php endwhile; ?>
         </tbody>
     </table>
 </div>
-
 <!-- ===========================
      PRÉSTAMOS VENCIDOS
      =========================== -->
