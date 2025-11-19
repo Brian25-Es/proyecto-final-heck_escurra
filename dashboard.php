@@ -193,9 +193,9 @@ function openTab(tabName) {
     event.target.classList.add("active");
 }
 
-/* =============================== */
-/* ALQUILAR LIBRO (YA TENÍAS ESTO) */
-/* =============================== */
+/* ============== */
+/* ALQUILAR LIBRO */
+/* ============== */
 function alquilarLibro(idLibro) {
     let usuarioSelect = document.getElementById("usuarioSelect-" + idLibro);
     let usuario_id = usuarioSelect.value;
