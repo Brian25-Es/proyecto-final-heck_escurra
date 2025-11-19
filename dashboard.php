@@ -184,6 +184,16 @@ $prestamosHistorial = $conn->query("
 </div>
 
 <script>
+
+    window.listaUsuarios = [];
+
+// Cargar lista de usuarios al iniciar
+fetch("backend/api_usuarios.php")
+    .then(res => res.json())
+    .then(data => {
+        window.listaUsuarios = data;
+    });
+    
 /* CAMBIAR TABS */
 function openTab(tabName) {
     document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
@@ -229,6 +239,7 @@ function devolverPrestamo(idPrestamo, idLibro) {
         document.getElementById("prestamo-" + idPrestamo).remove();
         actualizarPrestamos();
         actualizarHistorial();
+        actualizarLibros();
     });
 }
 
@@ -276,6 +287,41 @@ function actualizarHistorial() {
                         <td>${h.estado_prestamo}</td>
                     </tr>
                 `;
+            });
+        });
+}
+
+function actualizarLibros() {
+    fetch("backend/libros.php?action=listar")
+        .then(res => res.json())
+        .then(data => {
+
+            let tbody = document.querySelector("#libros tbody");
+            tbody.innerHTML = "";
+
+            data.forEach(l => {
+                if (l.estado === "Disponible") {
+                    tbody.innerHTML += `
+                        <tr id="row-${l.ID}">
+                            <td>${l.titulo}</td>
+                            <td>${l.autor}</td>
+                            <td>${l.editorial}</td>
+                            <td>${l['año']}</td>
+
+                            <td>
+                                <select id="usuarioSelect-${l.ID}">
+                                    ${window.listaUsuarios
+                                        .map(u => `<option value="${u.ID_Usuario}">${u.nombre_completo}</option>`)
+                                        .join("")}
+                                </select>
+                            </td>
+
+                            <td>
+                                <button class="btn" onclick="alquilarLibro(${l.ID})">Alquilar</button>
+                            </td>
+                        </tr>
+                    `;
+                }
             });
         });
 }
