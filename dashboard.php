@@ -185,7 +185,7 @@ $prestamosHistorial = $conn->query("
 
 <script>
 
-    window.listaUsuarios = [];
+window.listaUsuarios = [];
 
 // Cargar lista de usuarios al iniciar
 fetch("backend/api_usuarios.php")
@@ -193,7 +193,7 @@ fetch("backend/api_usuarios.php")
     .then(data => {
         window.listaUsuarios = data;
     });
-    
+
 /* CAMBIAR TABS */
 function openTab(tabName) {
     document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));

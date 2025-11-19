@@ -235,10 +235,34 @@ function openTab(tabName) {
     document.querySelectorAll('.tab-menu button').forEach(b => b.classList.remove('active'));
     event.target.classList.add('active');
 
-    // carga la data correspondiente si necesario
-    if (tabName === 'libros') loadLibros();
-    if (tabName === 'usuarios') loadUsuarios();
-    if (tabName === 'prestamos') loadPrestamos();
+    console.clear();
+    console.log("======================================");
+    console.log("   📂 TAB ACTUAL:", tabName.toUpperCase());
+    console.log("======================================");
+
+    if (tabName === 'libros') {
+        loadLibros().then(data => {
+            console.log("📚 TAB LIBROS → Datos cargados:", data);
+        });
+    }
+
+    if (tabName === 'usuarios') {
+        loadUsuarios().then(data => {
+            console.log("👤 TAB USUARIOS → Datos cargados:", data);
+        });
+    }
+
+    if (tabName === 'prestamos') {
+        loadPrestamos().then(data => {
+            console.log("📖 TAB PRÉSTAMOS → Datos cargados:", data);
+        });
+    }
+
+    if (tabName === 'cuentas') {
+        loadCuentas().then(data => {
+            console.log("🔐 TAB CUENTAS → Datos cargados:", data);
+        });
+    }
 }
 
 /* ---------- LIBROS (CRUD) ---------- */
@@ -265,6 +289,7 @@ async function loadLibros() {
                 </tr>
             `;
         });
+        return data;
     } catch (err) {
         alert('Error al cargar libros: ' + err);
     }
@@ -397,6 +422,7 @@ async function loadCuentas() {
                     </td>
                 </tr>`;
         });
+        return data;
     } catch (error) {
         alert("Error cargando cuentas: " + error);
     }
@@ -530,6 +556,7 @@ async function loadUsuarios() {
                 </tr>
             `;
         });
+        return data;
     } catch (err) {
         alert('Error al cargar usuarios: ' + err);
     }
@@ -610,6 +637,7 @@ async function loadPrestamos() {
                 </tr>
             `;
         });
+        return data;
     } catch (err) {
         alert('Error al cargar préstamos: ' + err);
     }
