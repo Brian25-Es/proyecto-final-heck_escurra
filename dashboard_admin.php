@@ -13,12 +13,19 @@ if ($_SESSION["usuario_rol"] !== "admin") {
 }
 
 $adminNombre = $_SESSION["usuario_nombre"];
-// Marcar vencidos (por si no está hecho en otro lado)
 $conn->query("
     UPDATE prestamos
     SET estado_prestamo = 'Vencido'
     WHERE estado_prestamo = 'Activo'
     AND fecha_devolucion < CURDATE()
+");
+
+$prestamosHistorial = $conn->query("
+    SELECT p.*, l.titulo, u.nombre_completo
+    FROM prestamos p
+    JOIN libros l ON p.ID_Libro = l.ID
+    JOIN usuarios u ON p.ID_Usuario = u.ID_Usuario
+    WHERE p.estado_prestamo = 'Devuelto'
 ");
 ?>
 <!DOCTYPE html>
@@ -44,6 +51,7 @@ $conn->query("
     <button class="active" onclick="openTab('libros')">📚 Libros</button>
     <button onclick="openTab('usuarios')">👤 Usuarios</button>
     <button onclick="openTab('prestamos')">📖 Préstamos</button>
+    <button onclick="openTab('cuentas')">👥 Cuentas sistema</button>
     <button onclick="openTab('sistema')">⚙ Opciones</button>
     <button class="btn-danger" onclick="window.location='logout.php'" style="flex:0.6;">🚪 Salir</button>
 </div>
@@ -95,11 +103,70 @@ $conn->query("
     </table>
 </div>
 
+<!-- TAB: CUENTAS DEL SISTEMA -->
+<div id="cuentas" class="tab-content">
+    <h2>Cuentas del Sistema (Administradores / Bibliotecarios)</h2>
+
+    <div style="margin-bottom:12px;">
+        <button class="btn" onclick="openModal('modal-cuenta', 'crear')">➕ Crear cuenta</button>
+        <button class="btn" onclick="loadCuentas()">🔄 Recargar</button>
+    </div>
+
+    <table id="tabla-cuentas">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Creado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+
 <!-- TAB SISTEMA -->
 <div id="sistema" class="tab-content">
     <h2>Opciones del Administrador</h2>
     <p>Editar tu perfil:</p>
     <button class="btn" onclick="window.location='editar_usuario.php'">✏ Editar Perfil</button>
+</div>
+
+<!-- MODAL: Usuario del sistema -->
+<div id="modal-cuenta-backdrop" class="modal-backdrop" role="dialog">
+    <div class="modal" id="modal-cuenta">
+        <h3 id="modal-cuenta-title">Crear cuenta</h3>
+
+        <div>
+            <div class="form-row">
+                <input id="cuenta-user" placeholder="Usuario">
+                <input id="cuenta-nombre" placeholder="Nombre">
+            </div>
+
+            <div class="form-row">
+                <input id="cuenta-email" placeholder="Email">
+                <select id="cuenta-rol">
+                    <option value="admin">admin</option>
+                    <option value="bibliotecario">bibliotecario</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <input id="cuenta-password" type="password" placeholder="Contraseña (opcional al editar)">
+            </div>
+
+            <input type="hidden" id="cuenta-id">
+
+            <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
+                <button class="btn" onclick="saveCuenta()">Guardar</button>
+                <button class="btn-danger" onclick="closeModal('modal-cuenta-backdrop')">Cancelar</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- MODAL: Libro (crear / editar) -->
@@ -268,10 +335,121 @@ function openModal(backdropId, mode, id = null) {
         }
         return;
     }
+
+    if (backdropId === "modal-cuenta") {
+        document.getElementById("modal-cuenta-backdrop").style.display = "flex";
+
+        if (mode === "crear") {
+            document.getElementById("modal-cuenta-title").textContent = "Crear cuenta";
+            document.getElementById("cuenta-id").value = "";
+            document.getElementById("cuenta-user").value = "";
+            document.getElementById("cuenta-nombre").value = "";
+            document.getElementById("cuenta-email").value = "";
+            document.getElementById("cuenta-rol").value = "bibliotecario";
+            document.getElementById("cuenta-password").value = "";
+        } 
+        else if (mode === "editar") {
+            fetch("backend/usuario_sistema.php?action=listar")
+                .then(r => r.json())
+                .then(list => {
+                    const u = list.find(x => x.ID_User == id);
+                    if (!u) return alert("Usuario no encontrado");
+
+                    document.getElementById("modal-cuenta-title").textContent = "Editar cuenta";
+
+                    document.getElementById("cuenta-id").value = u.ID_User;
+                    document.getElementById("cuenta-user").value = u.user;
+                    document.getElementById("cuenta-nombre").value = u.nombre;
+                    document.getElementById("cuenta-email").value = u.email;
+                    document.getElementById("cuenta-rol").value = u.rol;
+                    document.getElementById("cuenta-password").value = "";
+                });
+        }
+
+        return;
+    }
 }
 
 function closeModal(backdropId) {
     document.getElementById(backdropId).style.display = 'none';
+}
+
+async function loadCuentas() {
+    try {
+        const res = await fetch("backend/usuario_sistema.php?action=listar");
+        const data = await res.json();
+
+        const tbody = document.querySelector("#tabla-cuentas tbody");
+        tbody.innerHTML = "";
+
+        data.forEach(c => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${c.ID_User}</td>
+                    <td>${c.user}</td>
+                    <td>${c.nombre}</td>
+                    <td>${c.email}</td>
+                    <td>${c.rol}</td>
+                    <td>${c.created_at}</td>
+                    <td>
+                        <button class="btn-warning" onclick="openModal('modal-cuenta','editar',${c.ID_User})">Editar</button>
+                        <button class="btn-danger" onclick="deleteCuenta(${c.ID_User})">Eliminar</button>
+                    </td>
+                </tr>`;
+        });
+    } catch (error) {
+        alert("Error cargando cuentas: " + error);
+    }
+}
+
+async function saveCuenta() {
+    const id = document.getElementById("cuenta-id").value;
+
+    const payload = {
+        user: document.getElementById("cuenta-user").value.trim(),
+        nombre: document.getElementById("cuenta-nombre").value.trim(),
+        email: document.getElementById("cuenta-email").value.trim(),
+        rol: document.getElementById("cuenta-rol").value,
+        password: document.getElementById("cuenta-password").value.trim()
+    };
+
+    let url = "backend/usuario_sistema.php?action=insertar";
+
+    if (id) {
+        payload.ID_User = id;
+        url = "backend/usuario_sistema.php?action=editar";
+    }
+
+    const res = await fetch(url, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(payload)
+    });
+
+    const text = await res.text();
+
+    if (text.trim() === "ok") {
+        closeModal("modal-cuenta-backdrop");
+        loadCuentas();
+        alert("Cuenta guardada correctamente");
+    } else {
+        alert("Error: " + text);
+    }
+}
+
+function deleteCuenta(id) {
+    if (!confirm("¿Eliminar cuenta del sistema?")) return;
+
+    fetch("backend/usuario_sistema.php?action=borrar&id=" + id)
+        .then(r => r.text())
+        .then(t => {
+            if (t.trim() === "ok") {
+                loadCuentas();
+                alert("Cuenta eliminada");
+            } else {
+                alert("Error eliminando: " + t);
+            }
+        });
 }
 
 /* SAVE libro (crear o editar) */
@@ -477,6 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadLibros();
     loadUsuarios();
     loadPrestamos();
+    loadCuentas();
 });
 </script>
 </body>

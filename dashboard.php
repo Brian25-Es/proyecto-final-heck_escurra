@@ -210,6 +210,7 @@ function alquilarLibro(idLibro) {
         alert("Libro prestado correctamente");
         document.getElementById("row-" + idLibro).remove();
         actualizarPrestamos();
+        actualizarHistorial();
     });
 }
 
@@ -227,20 +228,22 @@ function devolverPrestamo(idPrestamo, idLibro) {
         alert("Préstamo devuelto correctamente");
         document.getElementById("prestamo-" + idPrestamo).remove();
         actualizarPrestamos();
+        actualizarHistorial();
     });
 }
 
 /* ACTUALIZAR TABLA */
 function actualizarPrestamos() {
-    fetch("backend/api_prestamos_usuario.php")
+    fetch("backend/api_prestamos_activos.php")
         .then(res => res.json())
         .then(data => {
-            let tabla = document.getElementById("tabla-prestamos");
+            let tabla = document.querySelector("#tabla-prestamos");
             tabla.innerHTML = "";
 
             data.forEach(p => {
                 tabla.innerHTML += `
                     <tr id="prestamo-${p.ID_Prestamo}">
+                        <td>${p.nombre_completo}</td>
                         <td>${p.titulo}</td>
                         <td>${p.fecha_prestamo}</td>
                         <td>${p.fecha_devolucion}</td>
@@ -255,8 +258,28 @@ function actualizarPrestamos() {
             });
         });
 }
+
+function actualizarHistorial() {
+    fetch("backend/api_historial_usuario.php")
+        .then(res => res.json())
+        .then(data => {
+            let tabla = document.querySelector("#historial tbody");
+            tabla.innerHTML = "";
+
+            data.forEach(h => {
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${h.nombre_completo}</td>
+                        <td>${h.titulo}</td>
+                        <td>${h.fecha_prestamo}</td>
+                        <td>${h.fecha_dev_real}</td>
+                        <td>${h.estado_prestamo}</td>
+                    </tr>
+                `;
+            });
+        });
+}
 </script>
 
 </body>
 </html>
-
