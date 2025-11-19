@@ -184,6 +184,16 @@ $prestamosHistorial = $conn->query("
 </div>
 
 <script>
+
+window.listaUsuarios = [];
+
+// Cargar lista de usuarios al iniciar
+fetch("backend/api_usuarios.php")
+    .then(res => res.json())
+    .then(data => {
+        window.listaUsuarios = data;
+    });
+
 /* CAMBIAR TABS */
 function openTab(tabName) {
     document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
@@ -193,9 +203,9 @@ function openTab(tabName) {
     event.target.classList.add("active");
 }
 
-/* =============================== */
-/* ALQUILAR LIBRO (YA TENÍAS ESTO) */
-/* =============================== */
+/* ===============*/
+/* ALQUILAR LIBRO */
+/* ===============*/
 function alquilarLibro(idLibro) {
     let usuarioSelect = document.getElementById("usuarioSelect-" + idLibro);
     let usuario_id = usuarioSelect.value;
@@ -210,6 +220,7 @@ function alquilarLibro(idLibro) {
         alert("Libro prestado correctamente");
         document.getElementById("row-" + idLibro).remove();
         actualizarPrestamos();
+        actualizarHistorial();
     });
 }
 
@@ -227,20 +238,23 @@ function devolverPrestamo(idPrestamo, idLibro) {
         alert("Préstamo devuelto correctamente");
         document.getElementById("prestamo-" + idPrestamo).remove();
         actualizarPrestamos();
+        actualizarHistorial();
+        actualizarLibros();
     });
 }
 
 /* ACTUALIZAR TABLA */
 function actualizarPrestamos() {
-    fetch("backend/api_prestamos_usuario.php")
+    fetch("backend/api_prestamos_activos.php")
         .then(res => res.json())
         .then(data => {
-            let tabla = document.getElementById("tabla-prestamos");
+            let tabla = document.querySelector("#tabla-prestamos");
             tabla.innerHTML = "";
 
             data.forEach(p => {
                 tabla.innerHTML += `
                     <tr id="prestamo-${p.ID_Prestamo}">
+                        <td>${p.nombre_completo}</td>
                         <td>${p.titulo}</td>
                         <td>${p.fecha_prestamo}</td>
                         <td>${p.fecha_devolucion}</td>
@@ -255,8 +269,63 @@ function actualizarPrestamos() {
             });
         });
 }
+
+function actualizarHistorial() {
+    fetch("backend/api_historial_usuario.php")
+        .then(res => res.json())
+        .then(data => {
+            let tabla = document.querySelector("#historial tbody");
+            tabla.innerHTML = "";
+
+            data.forEach(h => {
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${h.nombre_completo}</td>
+                        <td>${h.titulo}</td>
+                        <td>${h.fecha_prestamo}</td>
+                        <td>${h.fecha_dev_real}</td>
+                        <td>${h.estado_prestamo}</td>
+                    </tr>
+                `;
+            });
+        });
+}
+
+function actualizarLibros() {
+    fetch("backend/libros.php?action=listar")
+        .then(res => res.json())
+        .then(data => {
+
+            let tbody = document.querySelector("#libros tbody");
+            tbody.innerHTML = "";
+
+            data.forEach(l => {
+                if (l.estado === "Disponible") {
+                    tbody.innerHTML += `
+                        <tr id="row-${l.ID}">
+                            <td>${l.titulo}</td>
+                            <td>${l.autor}</td>
+                            <td>${l.editorial}</td>
+                            <td>${l['año']}</td>
+
+                            <td>
+                                <select id="usuarioSelect-${l.ID}">
+                                    ${window.listaUsuarios
+                                        .map(u => `<option value="${u.ID_Usuario}">${u.nombre_completo}</option>`)
+                                        .join("")}
+                                </select>
+                            </td>
+
+                            <td>
+                                <button class="btn" onclick="alquilarLibro(${l.ID})">Alquilar</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+        });
+}
 </script>
 
 </body>
 </html>
-

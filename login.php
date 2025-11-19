@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 require "backend/configdatabase.php";
 
@@ -7,6 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $usuario  = $_POST["usuario"];
     $password = $_POST["password"];
 
+    // Consulta correcta según tu tabla
     $sql = "SELECT * FROM usuario_sistema WHERE user = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $usuario);
@@ -14,15 +18,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
 
+    // Verificación de usuario + contraseña
     if ($user && password_verify($password, $user["password"])) {
-        // Inicio de sesión correcto
+
+        // Guardar datos en sesión correctamente
         $_SESSION["usuario_id"]     = $user["ID_User"];
         $_SESSION["usuario_nombre"] = $user["nombre"];
         $_SESSION["usuario_rol"]    = $user["rol"];
 
-        header("Location: dashboard.php");
+        // Redirección según rol
+        if ($user["rol"] === "admin") {
+            header("Location: dashboard_admin.php");
+        } else {
+            header("Location: dashboard.php");
+        }
         exit();
-    } else {
+    } 
+    else {
         $error = "Usuario o contraseña incorrectos";
     }
 }
@@ -32,20 +44,58 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
+
     <style>
-        body { font-family: Arial; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        form { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
-        input { display: block; margin-bottom: 10px; width: 200px; padding: 8px; }
-        button { padding: 8px 12px; }
+        body {
+            font-family: Arial;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        form {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.15);
+            width: 260px;
+            text-align: center;
+        }
+
+        input {
+            width: 90%;
+            padding: 8px;
+            margin: 10px 0;
+        }
+
+        button {
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
     </style>
+
 </head>
 <body>
-    <form action="" method="POST">
-        <h2>Iniciar sesión</h2>
-        <input type="text" name="usuario" placeholder="Usuario" required>
-        <input type="password" name="password" placeholder="Contraseña" required>
-        <button type="submit">Ingresar</button>
-        <?php if(isset($error)) echo "<p style='color:red'>$error</p>"; ?>
-    </form>
+
+<form action="" method="POST">
+    <h2>Iniciar sesión</h2>
+
+    <input type="text" name="usuario" placeholder="Usuario" required>
+    <input type="password" name="password" placeholder="Contraseña" required>
+
+    <button type="submit">Ingresar</button>
+
+    <?php if(isset($error)): ?>
+        <p class="error"><?= $error ?></p>
+    <?php endif; ?>
+</form>
+
 </body>
 </html>
